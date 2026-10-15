@@ -344,8 +344,86 @@ closeModal.addEventListener('click', () => {
     viewModal.classList.remove('active');
 });
 
-window.addEventListener('click', (e) => {
-    if (e.target === viewModal) {
-        viewModal.classList.remove('active');
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (document.activeElement.tagName === 'INPUT' && document.activeElement.id !== 'calcDisplay') {
+        return;
+    }
+    
+    const key = e.key;
+    
+    if ((key >= '0' && key <= '9') || key === '.') {
+        appendToDisplay(key);
+    } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+        appendToDisplay(key);
+        e.preventDefault();
+    } else if (key === 'Enter' || key === '=') {
+        calculate();
+        e.preventDefault();
+    } else if (key === 'Escape' || key === 'c' || key === 'C') {
+        clearDisplay();
+        e.preventDefault();
+    } else if (key === 'Backspace') {
+        backspace();
+        e.preventDefault();
     }
 });
+
+function appendToDisplay(value) {
+    const display = document.getElementById('calcDisplay');
+    if (display.value === 'Error') {
+        display.value = '';
+    }
+    display.value += value;
+}
+
+function clearDisplay() {
+    document.getElementById('calcDisplay').value = '';
+}
+
+function backspace() {
+    const display = document.getElementById('calcDisplay');
+    if (display.value === 'Error') {
+        display.value = '';
+        return;
+    }
+    display.value = display.value.slice(0, -1);
+}
+
+function calculate() {
+    const display = document.getElementById('calcDisplay');
+    try {
+        if (display.value === '') return;
+        const result = eval(display.value.replace(/×/g, '*'));
+        display.value = result === Infinity || isNaN(result) ? 'Error' : result;
+    } catch (error) {
+        display.value = 'Error';
+    }
+}
+
+function initCalculator() {
+    const calcBtns = document.querySelectorAll('.calc-btn');
+    const display = document.getElementById('calcDisplay');
+    
+    calcBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const value = btn.dataset.value;
+            
+            if (value === 'C') {
+                clearDisplay();
+            } else if (value === '←') {
+                backspace();
+            } else if (value === '=') {
+                calculate();
+            } else {
+                appendToDisplay(value);
+            }
+        });
+    });
+    
+    display.value = '';
+}
+
+initCalculator();
